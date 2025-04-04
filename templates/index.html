@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciador de Gastos</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; }
+        table { width: 90%; margin: auto; border-collapse: collapse; }
+        th, td { border: 1px solid black; padding: 8px; }
+        th { background-color: #f2f2f2; }
+        input, button, select { margin: 5px; padding: 8px; }
+    </style>
+</head>
+<body>
+    <h1>Gerenciador de Gastos</h1>
+
+    <form action="/add" method="post">
+        <input type="text" name="categoria" placeholder="Categoria" required>
+        <input type="number" step="0.01" name="valor" placeholder="Valor" required>
+        <input type="date" name="data" value="{{ hoje }}" required>
+        <button type="submit">Adicionar Gasto</button>
+    </form>
+
+    <!-- ?? Filtro de m�s -->
+    <form method="get" action="/">
+        <label for="mes">Filtrar por mês:</label>
+        <select name="mes" id="mes" onchange="this.form.submit()">
+            {% for mes in meses %}
+                <option value="{{ mes }}" {% if mes == mes_atual %}selected{% endif %}>{{ mes }}</option>
+            {% endfor %}
+        </select>
+    </form>
+
+    <h2>Lista de Gastos</h2>
+    <table>
+        <tr>
+            <th>ID</th>
+            <th>Categoria</th>
+            <th>Valor</th>
+            <th>Data</th>
+        </tr>
+        {% for gasto in gastos %}
+        <tr>
+            <td>{{ gasto.id }}</td>
+            <td>{{ gasto.categoria }}</td>
+            <td>R$ {{ gasto.valor }}</td>
+            <td>{{ gasto.data }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    <br>
+    <a href="/analisar?mes={{ mes_atual }}">Analisar Gastos</a>
+</body>
+</html>

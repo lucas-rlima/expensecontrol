@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Análise de Gastos</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <h1>Análise de Gastos</h1>
+
+    <!-- 🔽 Filtro de mês -->
+    <form method="get" action="/analisar">
+        <label for="mes">Filtrar por mês:</label>
+        <select name="mes" id="mes" onchange="this.form.submit()">
+            {% for mes in meses %}
+                <option value="{{ mes }}" {% if mes == mes_atual %}selected{% endif %}>{{ mes }}</option>
+            {% endfor %}
+        </select>
+    </form>
+
+    {% if alertas %}
+        <h2>🔔 Alertas:</h2>
+        <ul>
+            {% for alerta in alertas %}
+                <li>{{ alerta }}</li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>Sem alertas no momento.</p>
+    {% endif %}
+
+    <h2>📊 Gastos por Dia</h2>
+    <div style="width: 100%; max-width: 600px; margin: 0 auto;">
+        <canvas id="grafico"></canvas>
+    </div>
+
+    <script>
+        const dias = {{ dias | tojson }};
+        const valores = {{ valores | tojson }};
+        const maxY = {{ max_y | tojson }};
+    </script>
+    <script src="{{ url_for('static', filename='js/analise.js') }}"></script>
+    
+    <br>
+    <a href="/?mes={{ mes_atual }}">Voltar</a>
+</body>
+</html>
