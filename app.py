@@ -13,7 +13,7 @@ database_url = os.getenv("DATABASE_URL", "")
 if database_url.startswith("postgres://"):
     database_url = database_url.replace("postgres://", "postgresql://", 1)
 
-app.config['SQLALCHEMY_DATABASE_URI'] = database_url
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://database_url_540i_user:FFMId0O7trwV8bKdDAzcTNhY9jgMLqeA@dpg-cvob6f15pdvs739qplj0-a.oregon-postgres.render.com/database_url_540i'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
@@ -39,7 +39,8 @@ def obter_meses_disponiveis():
 def index():
     # Pega o mês atual ou o mês passado na URL
     mes_selecionado = request.args.get('mes') or datetime.today().strftime('%Y-%m')
-    gastos = Gasto.query.filter(db.func.strftime('%Y-%m', Gasto.data) == mes_selecionado).all()
+    # Altere a função strftime para to_char
+    gastos = Gasto.query.filter(db.func.to_char(Gasto.data, 'YYYY-MM') == mes_selecionado).all()
     meses_disponiveis = obter_meses_disponiveis()
     hoje = datetime.today().strftime('%Y-%m-%d')  # Obtém a data de hoje no formato YYYY-MM-DD
     return render_template("index.html", gastos=gastos, hoje=hoje, mes_atual=mes_selecionado, meses=meses_disponiveis)
@@ -86,7 +87,8 @@ def excluir_gasto(id):
 def analisar():
     # Pega o mês atual ou o mês passado na URL para análise
     mes_selecionado = request.args.get('mes') or datetime.today().strftime('%Y-%m')
-    gastos = Gasto.query.filter(db.func.strftime('%Y-%m', Gasto.data) == mes_selecionado).all()
+    # Altere a função strftime para to_char
+    gastos = Gasto.query.filter(db.func.to_char(Gasto.data, 'YYYY-MM') == mes_selecionado).all()
     meses_disponiveis = obter_meses_disponiveis()
 
     # 🚨 Detecta gastos acima da média
