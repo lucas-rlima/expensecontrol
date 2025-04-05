@@ -2,8 +2,11 @@
 console.log('Dias:', dias);
 console.log('Valores:', valores);
 
+
+
 const ctx = document.getElementById('grafico').getContext('2d');
 
+Chart.register(ChartDataLabels);
 new Chart(ctx, {
     type: 'bar',
     data: {
@@ -23,14 +26,26 @@ new Chart(ctx, {
         plugins: {
             title: {
                 display: true,
-                text: 'Gastos por Dia do Mês',
                 font: {
                     size: 18
                 }
             },
+            datalabels: {
+                display: true,  // Esta linha garante que os valores sejam mostrados
+                color: 'black',  // Cor do texto
+                font: {
+                    weight: 'bold',  // Peso da fonte
+                    size: 14  // Tamanho da fonte
+                },
+                formatter: function(value) {
+                    return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }); // Formatação do valor
+                },
+                anchor: 'end',  // Posiciona o valor no final da barra
+                align: 'top',  // Alinha o texto no topo da barra
+        },
             legend: {
                 display: false
-            }
+            },
         },
         scales: {
             x: {
@@ -41,6 +56,10 @@ new Chart(ctx, {
                 },
                 grid: {
                     display: false
+                },
+                title: {
+                    display: true,
+                    text: 'Dia',
                 }
             },
             y: {
@@ -54,9 +73,8 @@ new Chart(ctx, {
                 },
                 title: {
                     display: true,
-                    text: 'Valor (R$)'
                 }
             }
         }
-    }
+    },
 });

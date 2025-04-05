@@ -1,14 +1,19 @@
-from flask import Flask, render_template, request, redirect
+from flask import Flask, render_template, request, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
 import os
 from datetime import datetime
 from collections import defaultdict
+import re
 
 app = Flask(__name__)
 
 # Usa a variável de ambiente DATABASE_URL do Render
 # app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///gastos.db'
+database_url = os.getenv("DATABASE_URL", "")
+if database_url.startswith("postgres://"):
+    database_url = database_url.replace("postgres://", "postgresql://", 1)
+
+app.config['SQLALCHEMY_DATABASE_URI'] = database_url
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
@@ -25,12 +30,14 @@ with app.app_context():
     db.create_all()
 
 def obter_meses_disponiveis():
+    # Obtém os meses disponíveis no banco de dados
     datas = db.session.query(Gasto.data).all()
     meses = sorted(set(d[0].strftime('%Y-%m') for d in datas))
     return meses
 
 @app.route('/')
 def index():
+    # Pega o mês atual ou o mês passado na URL
     mes_selecionado = request.args.get('mes') or datetime.today().strftime('%Y-%m')
     gastos = Gasto.query.filter(db.func.strftime('%Y-%m', Gasto.data) == mes_selecionado).all()
     meses_disponiveis = obter_meses_disponiveis()
@@ -39,6 +46,7 @@ def index():
 
 @app.route('/add', methods=['POST'])
 def add_gasto():
+    # Adiciona um novo gasto
     categoria = request.form['categoria']
     valor = float(request.form['valor'])
     data = datetime.strptime(request.form['data'], '%Y-%m-%d')
@@ -49,8 +57,34 @@ def add_gasto():
 
     return redirect('/')
 
+@app.route('/editar/<int:id>', methods=['GET', 'POST'])
+def editar_gasto(id):
+    # Encontra o gasto pelo ID
+    gasto = Gasto.query.get_or_404(id)
+
+    if request.method == 'POST':
+        # Atualiza os dados do gasto
+        gasto.categoria = request.form['categoria']
+        gasto.valor = float(request.form['valor'])
+        gasto.data = datetime.strptime(request.form['data'], '%Y-%m-%d')
+
+        db.session.commit()
+        return redirect('/')
+
+    # Se for GET, exibe o formulário com os dados do gasto
+    return render_template('editar_gasto.html', gasto=gasto)
+
+@app.route('/excluir/<int:id>', methods=['GET'])
+def excluir_gasto(id):
+    # Encontra o gasto pelo ID
+    gasto = Gasto.query.get_or_404(id)
+    db.session.delete(gasto)
+    db.session.commit()
+    return redirect('/')
+
 @app.route('/analisar')
 def analisar():
+    # Pega o mês atual ou o mês passado na URL para análise
     mes_selecionado = request.args.get('mes') or datetime.today().strftime('%Y-%m')
     gastos = Gasto.query.filter(db.func.strftime('%Y-%m', Gasto.data) == mes_selecionado).all()
     meses_disponiveis = obter_meses_disponiveis()
@@ -66,7 +100,7 @@ def analisar():
         for gasto in Gasto.query.filter_by(categoria=categoria).all():
             if gasto.valor > media * 1.5 and gasto in gastos:  # só do mês atual
                 alertas.append(
-                    f"Gasto alto detectado em {categoria} (R${gasto.valor:.2f}, acima da média de R${media:.2f})"
+                    f"Gasto alto detectado em {categoria} (Foi gasto R${gasto.valor:.2f}, este valor está acima da média dessa categoria que é R${media:.2f})"
                 )
 
     # 📊 Agrupa valores por dia
@@ -78,7 +112,7 @@ def analisar():
     dias = sorted(gastos_por_dia.keys())
     valores = [gastos_por_dia[d] for d in dias]
     valor_maximo = max(gastos_por_dia.values()) if gastos_por_dia else 0
-    valor_maximo_ajustado = ((valor_maximo // 250) + 1) * 250
+    valor_maximo_ajustado = ((valor_maximo // 250) + 1) * 250  # Ajuste do valor máximo do gráfico
 
     return render_template("analise.html", 
                            alertas=alertas, 
@@ -89,7 +123,4 @@ def analisar():
                            meses=meses_disponiveis)
 
 if __name__ == '__main__':
-    with app.app_context():
-        db.create_all()
     app.run(debug=True, host='0.0.0.0', port=5000)
-

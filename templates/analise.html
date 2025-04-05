@@ -4,12 +4,19 @@
     <meta charset="UTF-8">
     <title>Análise de Gastos</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js" integrity="sha512-JPcRR8yFa8mmCsfrw4TNte1ZvF1e3+1SdGMslZvmrzDYxS69J7J49vkFL8u6u8PlPJK+H3voElBtUCzaXj+6ig==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <style>
+        body { font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif, sans-serif;}
+        input, button, select { margin: 5px; padding: 8px; }
+    </style>
 </head>
 <body>
-    <h1>Análise de Gastos</h1>
+    <header><h1>Análise de Gastos</h1></header>
 
     <!-- 🔽 Filtro de mês -->
-    <form method="get" action="/analisar">
+    <form method="get" action="/analisar" class="mes">
         <label for="mes">Filtrar por mês:</label>
         <select name="mes" id="mes" onchange="this.form.submit()">
             {% for mes in meses %}
@@ -22,15 +29,15 @@
         <h2>🔔 Alertas:</h2>
         <ul>
             {% for alerta in alertas %}
-                <li>{{ alerta }}</li>
+                {{ alerta }}
             {% endfor %}
         </ul>
     {% else %}
         <p>Sem alertas no momento.</p>
     {% endif %}
 
-    <h2>📊 Gastos por Dia</h2>
-    <div style="width: 100%; max-width: 600px; margin: 0 auto;">
+    <h2 class="h2gastos">📊 Gastos Diário</h2>
+    <div style="width: 100%; max-width: 600px; height: 100%; max-height: 400px;min-height: 300px; margin: 0 auto;">
         <canvas id="grafico"></canvas>
     </div>
 
@@ -39,9 +46,14 @@
         const valores = {{ valores | tojson }};
         const maxY = {{ max_y | tojson }};
     </script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js" integrity="sha512-JPcRR8yFa8mmCsfrw4TNte1ZvF1e3+1SdGMslZvmrzDYxS69J7J49vkFL8u6u8PlPJK+H3voElBtUCzaXj+6ig==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src="{{ url_for('static', filename='js/analise.js') }}"></script>
     
     <br>
-    <a href="/?mes={{ mes_atual }}">Voltar</a>
+    <div class="divbutton">
+    <a href="/?mes={{ mes_atual }}" class="button">Voltar</a>
+    </div>
 </body>
 </html>

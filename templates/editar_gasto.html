@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editar Despesa</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <header>
+    <h1>Editar Despesa</h1>
+    </header>
+    <div class="editform">
+        <form action="" method="POST">
+            <label for="categoria" class="lblcategoria">Categoria:</label>
+            <input type="text" class="inpcategoria" name="categoria" id="categoria" value="{{ gasto.categoria }}" required>
+
+            <label for="valor" class="lblvalor">Valor:</label>
+            <input type="number"  class="inpvalor" step="0.01" name="valor" id="valor" value="{{ gasto.valor }}" required>
+
+            <label for="data" class="lbldata">Data:</label>
+            <input type="date" class="inpdata" name="data" id="data" value="{{ gasto.data.strftime('%Y-%m-%d') }}" required>
+
+            <button type="submit" class="buttonsalvar">Salvar</button>
+            <button type="button" class="buttoncancel" onclick="window.location.href='/'">Cancelar</button>
+        </form>
+    </div>
+</body>
+</html>
